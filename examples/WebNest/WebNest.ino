@@ -15,13 +15,18 @@ Firebase firebase(REFERENCE_URL);
 
 void setup() {
   Serial.begin(115200);
+
   pinMode(device1, OUTPUT);
   pinMode(device2, OUTPUT);
   pinMode(device3, OUTPUT);
   pinMode(device4, OUTPUT);
-  // pinMode(LED_BUILTIN, OUTPUT);
-  // digitalWrite(LED_BUILTIN, LOW);
-  WiFi.mode(WIFI_STA);
+
+  #if !defined(ARDUINO_UNOWIFIR4)
+    WiFi.mode(WIFI_STA);
+  #else
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, LOW);
+  #endif
   WiFi.disconnect();
   delay(1000);
 
@@ -45,7 +50,10 @@ void setup() {
   Serial.print("http://");
   Serial.print(WiFi.localIP());
   Serial.println("/");
-  // digitalWrite(LED_BUILTIN, HIGH);
+  
+  #if defined(ARDUINO_UNOWIFIR4)
+    digitalWrite(LED_BUILTIN, HIGH);
+  #endif
 
   firebase.json(true);  // Make sure to add this line. 
 }
