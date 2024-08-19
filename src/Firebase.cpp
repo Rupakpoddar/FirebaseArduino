@@ -71,17 +71,17 @@ int Firebase::setString(String path, String data) {
       return 200; // Success
   }
 
-  return 400;     // Failed
+  return 400;     // Failure
 }
 
 int Firebase::setInt(String path, int data) {
-  String Data = String(data);
-  return Firebase::setNum(path, Data);
+  String _data = String(data);
+  return Firebase::setNum(path, _data);
 }
 
 int Firebase::setFloat(String path, float data) {
-  String Data = String(data);
-  return Firebase::setNum(path, Data);
+  String _data = String(data);
+  return Firebase::setNum(path, _data);
 }
 
 int Firebase::setNum(String path, String msg) {
@@ -112,7 +112,7 @@ int Firebase::setNum(String path, String msg) {
       return 200; // Success
   }
 
-  return 400;     // Failed
+  return 400;     // Failure
 }
 
 int Firebase::pushString(String path, String data) {
@@ -145,17 +145,17 @@ int Firebase::pushString(String path, String data) {
       return 200; // Success
   }
 
-  return 400;     // Failed
+  return 400;     // Failure
 }
 
 int Firebase::pushInt(String path, int data) {
-  String Data = String(data);
-  return Firebase::pushNum(path, Data);
+  String _data = String(data);
+  return Firebase::pushNum(path, _data);
 }
 
 int Firebase::pushFloat(String path, float data) {
-  String Data = String(data);
-  return Firebase::pushNum(path, Data);
+  String _data = String(data);
+  return Firebase::pushNum(path, _data);
 }
 
 int Firebase::pushNum(String path, String msg) {
@@ -186,7 +186,7 @@ int Firebase::pushNum(String path, String msg) {
       return 200; // Success
   }
 
-  return 400;     // Failed
+  return 400;     // Failure
 }
 
 String Firebase::getString(String path) {
@@ -263,7 +263,7 @@ int Firebase::remove(String path) {
       return 200; // Success
   }
 
-  return 400;     // Failed
+  return 400;     // Failure
 }
 
 void Firebase::Connect_to_host() {

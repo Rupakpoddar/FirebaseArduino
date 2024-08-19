@@ -58,12 +58,10 @@
 			int getInt(String path);
 			float getFloat(String path);
 			int remove(String path);
-			void json(bool json);
 			void Connect_to_host();
 
 		private:
 			String _host;
-			bool _json = false;
 			String _String;
 			int _int;
 			float _float;
