@@ -50,8 +50,6 @@ void setup() {
   firebase.setString("Example/setString", "It's Working");
   firebase.setInt("Example/setInt", 123);
   firebase.setFloat("Example/setFloat", 45.32);
-
-  firebase.json(true);              // Make sure to add this line.
   
   String data = firebase.getString("Example");  // Get data from the database.
 

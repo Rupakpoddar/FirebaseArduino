@@ -212,24 +212,33 @@ void Firebase::getData(String path) {
                "Host: " + _host + "\r\n" +
                "Connection: close\r\n\r\n");
 
-
-  while (_httpsClient.connected()) {
+  // Skip HTTP headers
+  bool headersEnded = false;
+  while (_httpsClient.connected() || _httpsClient.available()) {
     String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") {
+    if (line == "\r") { // End of headers
+      headersEnded = true;
       break;
     }
   }
 
-  String line;
-  while(_httpsClient.available()) {
-    line = _httpsClient.readStringUntil('\n');
-    _int = line.toInt();
-    _float = line.toFloat();
-    if (_json == false)
-      _String = line.substring(1,line.length()-1);
-    else
-      _String = line;
+  // Read the body
+  String body = "";
+  while (_httpsClient.available()) {
+    String line = _httpsClient.readStringUntil('\n');
+    if (line.length() > 0) {
+      body += line; // Accumulate response body
+    }
   }
+
+  // Remove any potential extra quotes
+  if (body.startsWith("\"") && body.endsWith("\"")) {
+    body = body.substring(1, body.length() - 1);
+  }
+
+  _int = body.toInt();
+  _float = body.toFloat();
+  _String = body;
 }
 
 int Firebase::remove(String path) {
@@ -255,10 +264,6 @@ int Firebase::remove(String path) {
   }
 
   return 400;     // Failed
-}
-
-void Firebase::json(bool json) {
-  _json = json;
 }
 
 void Firebase::Connect_to_host() {

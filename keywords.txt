@@ -13,5 +13,3 @@ getInt		KEYWORD2
 getFloat	KEYWORD2
 
 remove  	KEYWORD2
-
-json		KEYWORD2

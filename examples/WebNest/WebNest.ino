@@ -54,8 +54,6 @@ void setup() {
   #if defined(ARDUINO_UNOWIFIR4)
     digitalWrite(LED_BUILTIN, HIGH);
   #endif
-
-  firebase.json(true);  // Make sure to add this line. 
 }
 
 void loop() {
