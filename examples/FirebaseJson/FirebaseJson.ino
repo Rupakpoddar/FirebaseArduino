@@ -1,11 +1,5 @@
-/*
-  Make sure your Firebase project's '.read' and '.write' rules are set to 'true'. 
-  Ignoring this will prevent the MCU from communicating with the database. 
-  For more details- https://github.com/Rupakpoddar/ESP32Firebase 
-*/
-
 #include <ArduinoJson.h>            // https://github.com/bblanchon/ArduinoJson 
-#include <ESP32Firebase.h>
+#include <Firebase.h>
 
 #define _SSID "ENTER HERE"          // Your WiFi SSID 
 #define _PASSWORD "ENTER HERE"      // Your WiFi Password 

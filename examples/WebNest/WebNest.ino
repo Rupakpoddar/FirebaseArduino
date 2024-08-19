@@ -1,15 +1,5 @@
-/*
-  Make sure your Firebase project's '.read' and '.write' rules are set to 'true'. 
-  Ignoring this will prevent the MCU from communicating with the database. 
-  For more details- https://github.com/Rupakpoddar/ESP32Firebase 
-
-  Download the Android app from- https://play.google.com/store/apps/details?id=com.rupak.firebaseremote
-  Online remote (Works with any web browser)- https://rupakpoddar.github.io/Firebase-automation-web-interface/
-  Use Python to control devices- https://github.com/Rupakpoddar/Firebase-with-python
-*/
-
 #include <ArduinoJson.h>            // https://github.com/bblanchon/ArduinoJson 
-#include <ESP32Firebase.h>
+#include <Firebase.h>
 
 #define _SSID "ENTER HERE"          // Your WiFi SSID 
 #define _PASSWORD "ENTER HERE"      // Your WiFi Password 

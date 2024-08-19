@@ -1,28 +1,30 @@
 /*
-MIT License
 
-Copyright (c) 2023 Rupak Poddar
+	MIT License
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+	Copyright (c) 2024 Rupak Poddar
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+
 */
 
-#include "ESP32Firebase.h"
+#include "Firebase.h"
 
 Firebase::Firebase(String referenceURL) {
 	_host = referenceURL;
@@ -35,7 +37,9 @@ Firebase::Firebase(String referenceURL) {
     _host.remove(_host.length() - 1);
   }
   
-  // _httpsClient.setInsecure();
+  #if !defined(ARDUINO_UNOWIFIR4)
+      _httpsClient.setInsecure();
+  #endif
 }
 
 int Firebase::setString(String path, String data) {
@@ -47,7 +51,7 @@ int Firebase::setString(String path, String data) {
           "Host: " + _host + "\r\n" +
           "Connection: close\r\n" +
           "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; esp32 Lua; Windows NT 5.1)\r\n" +
+          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
           "Content-Type: application/json;charset=utf-8\r\n" +
           "Content-Length: " + msg.length() + "\r\n" +
           "\r\n" +
@@ -88,7 +92,7 @@ int Firebase::setNum(String path, String msg) {
           "Host: " + _host + "\r\n" +
           "Connection: close\r\n" +
           "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; esp32 Lua; Windows NT 5.1)\r\n" +
+          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
           "Content-Type: application/json;charset=utf-8\r\n" +
           "Content-Length: " + msg.length() + "\r\n" +
           "\r\n" +
@@ -121,7 +125,7 @@ int Firebase::pushString(String path, String data) {
           "Host: " + _host + "\r\n" +
           "Connection: close\r\n" +
           "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; esp32 Lua; Windows NT 5.1)\r\n" +
+          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
           "Content-Type: application/json;charset=utf-8\r\n" +
           "Content-Length: " + msg.length() + "\r\n" +
           "\r\n" +
@@ -162,7 +166,7 @@ int Firebase::pushNum(String path, String msg) {
           "Host: " + _host + "\r\n" +
           "Connection: close\r\n" +
           "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; esp32 Lua; Windows NT 5.1)\r\n" +
+          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
           "Content-Type: application/json;charset=utf-8\r\n" +
           "Content-Length: " + msg.length() + "\r\n" +
           "\r\n" +
