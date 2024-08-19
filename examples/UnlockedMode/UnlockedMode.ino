@@ -49,11 +49,13 @@ void setup() {
   firebase.setString("Example/setString", "It's Working");
   firebase.setInt("Example/setInt", 123);
   firebase.setFloat("Example/setFloat", 45.32);
+  firebase.setBool("Example/setBool", true);
 
   // Examples of pushing String, integer and float values.
   firebase.pushString("push", "Hello");
   firebase.pushInt("push", 789);
   firebase.pushFloat("push", 89.54);
+  firebase.pushBool("push", false);
 
   // Example of getting a String.
   String data1 = firebase.getString("Example/setString");
@@ -69,6 +71,11 @@ void setup() {
   float data3 = firebase.getFloat("Example/setFloat");
   Serial.print("Received Float:\t\t");
   Serial.println(data3);
+
+  // Example of getting a boolean.
+  bool data4 = firebase.getBool("Example/setBool");
+  Serial.print("Received Bool:\t\t");
+  Serial.println(data4);
 
   // Example of data deletion.
   firebase.remove("Example");

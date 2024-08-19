@@ -42,50 +42,33 @@ Firebase::Firebase(String referenceURL) {
   #endif
 }
 
+void Firebase::connect_to_host() {
+	int r = 0;
+  while((!_httpsClient.connect(_host.c_str(), PORT)) && (r < 30)) {
+      delay(100);
+      r++;
+  }
+}
+
 int Firebase::setString(String path, String data) {
-	Connect_to_host();
-  String jsonObject = String("/") + path + String(".json");
-  String msg = "\"" + data + "\"";
-
-  _httpsClient.print(String("PUT ") + jsonObject + " HTTP/1.1\r\n" +
-          "Host: " + _host + "\r\n" +
-          "Connection: close\r\n" +
-          "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
-          "Content-Type: application/json;charset=utf-8\r\n" +
-          "Content-Length: " + msg.length() + "\r\n" +
-          "\r\n" +
-          msg + "\r\n");
-
-  while (_httpsClient.connected()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") {
-      break;
-    }
-  }
-
-  String line;
-  while(_httpsClient.available()) {
-    line = _httpsClient.readStringUntil('\n');
-    if (line.length() > 0)
-      return 200; // Success
-  }
-
-  return 400;     // Failure
+  String _data = "\"" + data + "\"";
+  return this->set(path, _data);
 }
 
 int Firebase::setInt(String path, int data) {
-  String _data = String(data);
-  return Firebase::setNum(path, _data);
+  return this->set(path, String(data));
 }
 
 int Firebase::setFloat(String path, float data) {
-  String _data = String(data);
-  return Firebase::setNum(path, _data);
+  return this->set(path, String(data));
 }
 
-int Firebase::setNum(String path, String msg) {
-	Connect_to_host();
+int Firebase::setBool(String path, bool data) {
+  return this->set(path, data ? "true" : "false");
+}
+
+int Firebase::set(String path, String msg) {
+	connect_to_host();
   String jsonObject = String("/") + path + String(".json");
 
   _httpsClient.print(String("PUT ") + jsonObject + " HTTP/1.1\r\n" +
@@ -116,50 +99,24 @@ int Firebase::setNum(String path, String msg) {
 }
 
 int Firebase::pushString(String path, String data) {
-	Connect_to_host();
-  String jsonObject = String("/") + path + String(".json");
-
-  String msg = "\"" + data + "\"";
-
-  _httpsClient.print(String("POST ") + jsonObject + " HTTP/1.1\r\n" +
-          "Host: " + _host + "\r\n" +
-          "Connection: close\r\n" +
-          "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
-          "Content-Type: application/json;charset=utf-8\r\n" +
-          "Content-Length: " + msg.length() + "\r\n" +
-          "\r\n" +
-          msg + "\r\n");
-
-  while (_httpsClient.connected()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") {
-      break;
-    }
-  }
-
-  String line;
-  while(_httpsClient.available()) {
-    line = _httpsClient.readStringUntil('\n');
-    if (line.length() > 0)
-      return 200; // Success
-  }
-
-  return 400;     // Failure
+  String _data = "\"" + data + "\"";
+  return this->push(path, _data);
 }
 
 int Firebase::pushInt(String path, int data) {
-  String _data = String(data);
-  return Firebase::pushNum(path, _data);
+  return this->push(path, String(data));
 }
 
 int Firebase::pushFloat(String path, float data) {
-  String _data = String(data);
-  return Firebase::pushNum(path, _data);
+  return this->push(path, String(data));
 }
 
-int Firebase::pushNum(String path, String msg) {
-	Connect_to_host();
+int Firebase::pushBool(String path, bool data) {
+  return this->push(path, data ? "true" : "false");
+}
+
+int Firebase::push(String path, String msg) {
+	connect_to_host();
   String jsonObject = String("/") + path + String(".json");
 
   _httpsClient.print(String("POST ") + jsonObject + " HTTP/1.1\r\n" +
@@ -190,22 +147,23 @@ int Firebase::pushNum(String path, String msg) {
 }
 
 String Firebase::getString(String path) {
-  Firebase::getData(path);
-  return _String;
+  return String(this->get(path));
 }
 
 int Firebase::getInt(String path) {
-  Firebase::getData(path);
-  return _int;
+  return this->get(path).toInt();
 }
 
 float Firebase::getFloat(String path) {
-  Firebase::getData(path);
-  return _float;
+  return this->get(path).toFloat();
 }
 
-void Firebase::getData(String path) {
-	Connect_to_host();
+bool Firebase::getBool(String path) {
+  return this->get(path) == "true";
+}
+
+String Firebase::get(String path) {
+	connect_to_host();
   String jsonObject = String("/") + path + String(".json");
 
   _httpsClient.print(String("GET ") + jsonObject + " HTTP/1.1\r\n" +
@@ -236,13 +194,11 @@ void Firebase::getData(String path) {
     body = body.substring(1, body.length() - 1);
   }
 
-  _int = body.toInt();
-  _float = body.toFloat();
-  _String = body;
+  return body;
 }
 
 int Firebase::remove(String path) {
-	Connect_to_host();
+	connect_to_host();
   String jsonObject = String("/") + path + String(".json");
 
   _httpsClient.print(String("DELETE ") + jsonObject + " HTTP/1.1\r\n" +
@@ -264,12 +220,4 @@ int Firebase::remove(String path) {
   }
 
   return 400;     // Failure
-}
-
-void Firebase::Connect_to_host() {
-	int r=0;
-  while((!_httpsClient.connect(_host.c_str(), PORT)) && (r < 30)) {
-      delay(100);
-      r++;
-  }
 }

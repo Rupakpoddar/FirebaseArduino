@@ -46,25 +46,26 @@
 		public:
 			Firebase(String referenceURL);
 			int setString(String path, String data);
-			int setNum(String path, String data);
 			int setInt(String path, int data);
 			int setFloat(String path, float data);
+			int setBool(String path, bool data);
 			int pushString(String path, String data);
-			int pushNum(String path, String data);
 			int pushInt(String path, int data);
 			int pushFloat(String path, float data);
-			void getData(String path);
+			int pushBool(String path, bool data);
 			String getString(String path);
 			int getInt(String path);
 			float getFloat(String path);
+			bool getBool(String path);
 			int remove(String path);
-			void Connect_to_host();
 
 		private:
 			String _host;
-			String _String;
-			int _int;
-			float _float;
+			void connect_to_host();
+
+			int set(String path, String msg);
+			int push(String path, String msg);
+			String get(String path);
 
 			#if defined(ARDUINO_UNOWIFIR4)
 				WiFiSSLClient _httpsClient;
