@@ -57,7 +57,7 @@
 			String getString(String path);
 			int getInt(String path);
 			float getFloat(String path);
-			int deleteData(String path);
+			int remove(String path);
 			void json(bool json);
 			void Connect_to_host();
 

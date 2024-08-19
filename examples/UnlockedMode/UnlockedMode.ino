@@ -71,7 +71,7 @@ void setup() {
   Serial.println(data3);
 
   // Example of data deletion.
-  firebase.deleteData("Example");
+  firebase.remove("Example");
 }
 
 void loop() {

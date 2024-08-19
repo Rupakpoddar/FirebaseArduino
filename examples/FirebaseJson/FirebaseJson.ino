@@ -71,8 +71,8 @@ void setup() {
   Serial.print("Received Float:\t\t");
   Serial.println(received_float);
 
-  // Delete data from the realtime database.
-  firebase.deleteData("Example");
+  // Remove data from the realtime database.
+  firebase.remove("Example");
 }
 
 void loop() {

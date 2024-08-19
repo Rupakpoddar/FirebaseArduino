@@ -232,7 +232,7 @@ void Firebase::getData(String path) {
   }
 }
 
-int Firebase::deleteData(String path) {
+int Firebase::remove(String path) {
 	Connect_to_host();
   String jsonObject = String("/") + path + String(".json");
 
