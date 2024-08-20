@@ -44,7 +44,7 @@
 	class Firebase
 	{
 		public:
-			Firebase(String referenceURL);
+			Firebase(String referenceURL, String authToken = "");
 			int setString(String path, String data);
 			int setInt(String path, int data);
 			int setFloat(String path, float data);
@@ -60,7 +60,7 @@
 			int remove(String path);
 
 		private:
-			String _host;
+			String _host, _authToken;
 			void connect_to_host();
 
 			int set(String path, String msg);

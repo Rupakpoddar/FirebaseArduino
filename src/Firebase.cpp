@@ -26,8 +26,9 @@
 
 #include "Firebase.h"
 
-Firebase::Firebase(String referenceURL) {
+Firebase::Firebase(String referenceURL, String authToken) {
 	_host = referenceURL;
+  _authToken = authToken;
 
   if (_host.startsWith("https://")) {
     _host.remove(0, 8);
@@ -69,7 +70,13 @@ int Firebase::setBool(String path, bool data) {
 
 int Firebase::set(String path, String msg) {
 	connect_to_host();
-  String jsonObject = String("/") + path + String(".json");
+
+  String jsonObject = "";
+  if (_authToken != "") {
+    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+  } else {
+    jsonObject = String("/") + path + String(".json");
+  }
 
   _httpsClient.print(String("PUT ") + jsonObject + " HTTP/1.1\r\n" +
           "Host: " + _host + "\r\n" +
@@ -117,7 +124,13 @@ int Firebase::pushBool(String path, bool data) {
 
 int Firebase::push(String path, String msg) {
 	connect_to_host();
-  String jsonObject = String("/") + path + String(".json");
+
+  String jsonObject = "";
+  if (_authToken != "") {
+    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+  } else {
+    jsonObject = String("/") + path + String(".json");
+  }
 
   _httpsClient.print(String("POST ") + jsonObject + " HTTP/1.1\r\n" +
           "Host: " + _host + "\r\n" +
@@ -164,7 +177,13 @@ bool Firebase::getBool(String path) {
 
 String Firebase::get(String path) {
 	connect_to_host();
-  String jsonObject = String("/") + path + String(".json");
+
+  String jsonObject = "";
+  if (_authToken != "") {
+    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+  } else {
+    jsonObject = String("/") + path + String(".json");
+  }
 
   _httpsClient.print(String("GET ") + jsonObject + " HTTP/1.1\r\n" +
                "Host: " + _host + "\r\n" +
@@ -199,7 +218,13 @@ String Firebase::get(String path) {
 
 int Firebase::remove(String path) {
 	connect_to_host();
-  String jsonObject = String("/") + path + String(".json");
+
+  String jsonObject = "";
+  if (_authToken != "") {
+    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+  } else {
+    jsonObject = String("/") + path + String(".json");
+  }
 
   _httpsClient.print(String("DELETE ") + jsonObject + " HTTP/1.1\r\n" +
                "Host: " + _host + "\r\n" +
