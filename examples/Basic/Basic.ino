@@ -115,7 +115,7 @@ void setup() {
   Serial.println(retrievedInt);
 
   float retrievedFloat = fb.getFloat("Example/setFloat");
-  Serial.print("Retrieved Float:\t\t");
+  Serial.print("Retrieved Float:\t");
   Serial.println(retrievedFloat);
 
   bool retrievedBool = fb.getBool("Example/setBool");
