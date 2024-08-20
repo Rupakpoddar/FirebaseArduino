@@ -88,21 +88,36 @@ int Firebase::set(String path, String msg) {
           "\r\n" +
           msg + "\r\n");
 
-  while (_httpsClient.connected()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") {
-      break;
+  String responseLine;
+  int responseCode = 0;
+  bool headersEnded = false;
+
+  while (_httpsClient.connected() || _httpsClient.available()) {
+    if (_httpsClient.available()) {
+      responseLine = _httpsClient.readStringUntil('\n');
+      responseLine.trim();  // Remove any leading or trailing whitespace
+
+      if (!headersEnded) {
+        // Check for the status line
+        if (responseLine.startsWith("HTTP/")) {
+          int firstSpace = responseLine.indexOf(' ');
+          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+
+          if (firstSpace > 0 && secondSpace > 0) {
+            responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+          }
+        }
+        
+        // End of headers
+        if (responseLine.length() == 0) {
+          headersEnded = true;
+        }
+      }
     }
   }
 
-  String line;
-  while(_httpsClient.available()) {
-    line = _httpsClient.readStringUntil('\n');
-    if (line.length() > 0)
-      return 200; // Success
-  }
-
-  return 400;     // Failure
+  // Return the response code
+  return responseCode;
 }
 
 int Firebase::pushString(String path, String data) {
@@ -142,25 +157,40 @@ int Firebase::push(String path, String msg) {
           "\r\n" +
           msg + "\r\n");
 
-  while (_httpsClient.connected()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") {
-      break;
+  String responseLine;
+  int responseCode = 0;
+  bool headersEnded = false;
+
+  while (_httpsClient.connected() || _httpsClient.available()) {
+    if (_httpsClient.available()) {
+      responseLine = _httpsClient.readStringUntil('\n');
+      responseLine.trim();  // Remove any leading or trailing whitespace
+
+      if (!headersEnded) {
+        // Check for the status line
+        if (responseLine.startsWith("HTTP/")) {
+          int firstSpace = responseLine.indexOf(' ');
+          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+
+          if (firstSpace > 0 && secondSpace > 0) {
+            responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+          }
+        }
+        
+        // End of headers
+        if (responseLine.length() == 0) {
+          headersEnded = true;
+        }
+      }
     }
   }
 
-  String line;
-  while(_httpsClient.available()) {
-    line = _httpsClient.readStringUntil('\n');
-    if (line.length() > 0)
-      return 200; // Success
-  }
-
-  return 400;     // Failure
+  // Return the response code
+  return responseCode;
 }
 
 String Firebase::getString(String path) {
-  return String(this->get(path));
+  return this->get(path);
 }
 
 int Firebase::getInt(String path) {
@@ -189,26 +219,40 @@ String Firebase::get(String path) {
                "Host: " + _host + "\r\n" +
                "Connection: close\r\n\r\n");
 
-  // Skip HTTP headers
+  String responseLine;
   bool headersEnded = false;
-  while (_httpsClient.connected() || _httpsClient.available()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") { // End of headers
-      headersEnded = true;
-      break;
-    }
-  }
-
-  // Read the body
   String body = "";
-  while (_httpsClient.available()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line.length() > 0) {
-      body += line; // Accumulate response body
+  int statusCode = 0;
+
+  while (_httpsClient.connected() || _httpsClient.available()) {
+    if (_httpsClient.available()) {
+      responseLine = _httpsClient.readStringUntil('\n');
+      responseLine.trim();  // Remove leading/trailing whitespace
+
+      if (!headersEnded) {
+        if (responseLine.length() == 0) {
+          // Empty line indicates end of headers
+          headersEnded = true;
+        } else if (responseLine.startsWith("HTTP/")) {
+          // Extract and optionally log status code if needed
+          int firstSpace = responseLine.indexOf(' ');
+          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+          if (firstSpace > 0 && secondSpace > 0) {
+            statusCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+          }
+        }
+      } else {
+        // Append body content
+        body += responseLine;
+      }
     }
   }
 
-  // Remove any potential extra quotes
+  if (statusCode != 200) {
+    return "NULL";
+  }
+
+  // Remove any potential extra quotes from the body
   if (body.startsWith("\"") && body.endsWith("\"")) {
     body = body.substring(1, body.length() - 1);
   }
@@ -230,19 +274,34 @@ int Firebase::remove(String path) {
                "Host: " + _host + "\r\n" +
                "Connection: close\r\n\r\n");
 
-  while (_httpsClient.connected()) {
-    String line = _httpsClient.readStringUntil('\n');
-    if (line == "\r") {
-      break;
+  String responseLine;
+  int responseCode = 0;
+  bool headersEnded = false;
+
+  while (_httpsClient.connected() || _httpsClient.available()) {
+    if (_httpsClient.available()) {
+      responseLine = _httpsClient.readStringUntil('\n');
+      responseLine.trim();  // Remove any leading or trailing whitespace
+
+      if (!headersEnded) {
+        // Check for the status line
+        if (responseLine.startsWith("HTTP/")) {
+          int firstSpace = responseLine.indexOf(' ');
+          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+
+          if (firstSpace > 0 && secondSpace > 0) {
+            responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+          }
+        }
+        
+        // End of headers
+        if (responseLine.length() == 0) {
+          headersEnded = true;
+        }
+      }
     }
   }
 
-  String line;
-  while(_httpsClient.available()) {
-    line = _httpsClient.readStringUntil('\n');
-    if (line.length() > 0)
-      return 200; // Success
-  }
-
-  return 400;     // Failure
+  // Return the response code
+  return responseCode;
 }
