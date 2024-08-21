@@ -1,8 +1,14 @@
 # Firebase Realtime Database Arduino Library
 
-![Release](https://img.shields.io/github/v/release/yourusername/your-repo-name)
-![Platform](https://img.shields.io/badge/platform-ESP8266%20|%20ESP32%20|%20UNO%20R4%20WiFi-blue)
-![License](https://img.shields.io/github/license/yourusername/your-repo-name)
+<p align="center">
+  <a href="https://github.com/Rupakpoddar/Firebase-Arduino-Library/archive/refs/heads/main.zip">
+    <img src="https://img.shields.io/badge/Download-Library-brightgreen?style=for-the-badge&logo=icloud&logoColor=white&color=147EFB">
+  </a>
+  <a href="https://github.com/Rupakpoddar/Firebase-Arduino-Library/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge&logo=open-source-initiative&logoColor=white&color=5AC8FA">
+  </a>
+  <img src="https://img.shields.io/badge/Platform-ESP8266%20%7C%20ESP32%20%7C%20UNO%20R4%20WiFi-black?style=for-the-badge&logo=arduino&logoColor=white&color=FF2D55">
+</p>
 
 This Arduino library enables seamless connectivity with Firebase Realtime Database on ESP8266, ESP32, and Arduino UNO R4 WiFi boards. It's designed for reliable, low-latency operations, including reading, writing, updating, and removing data from the Firebase Realtime Database.
 
@@ -18,5 +24,4 @@ This Arduino library enables seamless connectivity with Firebase Realtime Databa
 
 ---
 
-**Author**: Your Name
-
+**Author**: Rupak Poddar
