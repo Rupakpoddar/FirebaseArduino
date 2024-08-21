@@ -11,6 +11,7 @@ This Arduino library enables seamless connectivity with Firebase Realtime Databa
 - **Cross-Board Compatibility**: Supports ESP8266, ESP32, and Arduino UNO R4 WiFi.
 - **Low Latency**: Optimized for quick data transactions.
 - **Full Database Control**: Easily read, write, update, and delete data.
+- **Arduino Cloud Support**: Available for use in Arduino Cloud projects.
 
 ---
 
