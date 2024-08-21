@@ -14,7 +14,7 @@ This Arduino library enables seamless connectivity with Firebase Realtime Databa
 
 ---
 
-**Contributions**: Contributions are welcome! Feel free to open issues or submit pull requests.
+**Read More**: For more information, please visit the [Arduino Reference Documentation](https://www.arduino.cc/reference/en/libraries/firebase/).
 
 ---
 
