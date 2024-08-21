@@ -1,14 +1,8 @@
 # Firebase Realtime Database Arduino Library
 
-<p align="center">
-  <a href="https://github.com/Rupakpoddar/Firebase-Arduino-Library/archive/refs/heads/main.zip">
-    <img src="https://img.shields.io/badge/Download-Library-brightgreen?style=for-the-badge&logo=icloud&logoColor=white&color=147EFB">
-  </a>
-  <a href="https://github.com/Rupakpoddar/Firebase-Arduino-Library/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge&logo=open-source-initiative&logoColor=white&color=5AC8FA">
-  </a>
-  <img src="https://img.shields.io/badge/Platform-ESP8266%20%7C%20ESP32%20%7C%20UNO%20R4%20WiFi-black?style=for-the-badge&logo=arduino&logoColor=white&color=FF2D55">
-</p>
+[![Download](https://img.shields.io/github/downloads/Rupakpoddar/Firebase-Arduino-Library/total?style=for-the-badge&logo=icloud&logoColor=white&labelColor=23272E&color=007ACC)](https://github.com/Rupakpoddar/Firebase-Arduino-Library/releases)
+[![Platform](https://img.shields.io/badge/platform-ESP8266%20|%20ESP32%20|%20UNO%20R4%20WiFi-007ACC?style=for-the-badge&logo=arduino&logoColor=white&labelColor=23272E)](https://github.com/Rupakpoddar/Firebase-Arduino-Library)
+[![License](https://img.shields.io/github/license/Rupakpoddar/Firebase-Arduino-Library?style=for-the-badge&logo=github&logoColor=white&labelColor=23272E&color=007ACC)](https://github.com/Rupakpoddar/Firebase-Arduino-Library/blob/main/LICENSE)
 
 This Arduino library enables seamless connectivity with Firebase Realtime Database on ESP8266, ESP32, and Arduino UNO R4 WiFi boards. It's designed for reliable, low-latency operations, including reading, writing, updating, and removing data from the Firebase Realtime Database.
 
