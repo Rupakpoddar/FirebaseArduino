@@ -46,7 +46,7 @@
 */
 
 /* Test Mode (No Authentication) */
-#define REFERENCE_URL "https://your-database.firebaseio.com"
+#define REFERENCE_URL "https://your-database.firebaseio.com/"
 
 /* Uncomment the following line for Locked Mode (With Authentication) */
 // #define AUTH_TOKEN "YOUR-AUTHENTICATION-CODE"

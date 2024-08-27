@@ -20,7 +20,19 @@
   this sketch.
 */
 
-#include <ArduinoJson.h>  // https://www.arduino.cc/reference/en/libraries/arduinojson/
+/*
+  ---------------------------------
+      INFO: ArduinoJson library   
+  ---------------------------------
+
+  Download ArduinoJson library from the Library Manager:
+  https://www.arduino.cc/reference/en/libraries/arduinojson/
+
+  For guidance on serialization and deserialization, visit:
+  https://arduinojson.org/v7/assistant/
+*/
+
+#include <ArduinoJson.h>
 #include <Firebase.h>
 #include "secrets.h"
 
@@ -63,22 +75,43 @@ void setup() {
 
   /* ----- */ 
 
-  /* Set example data in Firebase to be retrieved later */
-  fb.setString("Example/setString", "Hello World!");
-  fb.setInt("Example/setInt", 123);
-  fb.setFloat("Example/setFloat", 45.67);
-  fb.setBool("Example/setBool", true);
+  /* ----- Serialization: Set example data in Firebase ----- */
 
-  /* Retrieve example data from Firebase */
-  String input = fb.getString("Example");
+  // Create a JSON document to hold the output data
+  JsonDocument docOutput;
+
+  // Add various data types to the JSON document
+  docOutput["myString"] = "Hello World!";
+  docOutput["myInt"] = 123;
+  docOutput["myFloat"] = 45.67;
+  docOutput["myBool"] = true;
+
+  // Create a string to hold the serialized JSON data
+  String output;
+
+  // Optional: Shrink the JSON document to fit its contents exactly
+  docOutput.shrinkToFit();
+
+  // Serialize the JSON document to a string
+  serializeJson(docOutput, output);
+
+  // Set the serialized JSON data in Firebase
+  fb.setJson("Example", output);
+
+  /* ----- Deserialization: Retrieve example data from Firebase ----- */
+
+  // Retrieve the serialized JSON data from Firebase
+  String input = fb.getJson("Example");
+
+  // Check if the retrieved data is "NULL", indicating a retrieval error
   if (input == "NULL") {
     Serial.println("Could not retrieve data from Firebase");
   } else {
-    /* Deserialize the retrieved input */
-    /* Refer to: https://arduinojson.org/v7/assistant */
-    JsonDocument doc;
+    // Create a JSON document to hold the deserialized data
+    JsonDocument docInput;
 
-    DeserializationError error = deserializeJson(doc, input);
+    // Deserialize the JSON string into the JSON document
+    DeserializationError error = deserializeJson(docInput, input);
 
     if (error) {
       Serial.print("deserializeJson() failed: ");
@@ -86,10 +119,11 @@ void setup() {
       return;
     }
 
-    const char* retrievedString = doc["setString"]; // "Hello World!"
-    int retrievedInt = doc["setInt"];               // 123
-    float retrievedFloat = doc["setFloat"];         // 45.67
-    bool retrievedBool = doc["setBool"];            // true
+    // Extract the values from the deserialized JSON document
+    const char* retrievedString = docInput["myString"]; // "Hello World!"
+    int retrievedInt = docInput["myInt"];               // 123
+    float retrievedFloat = docInput["myFloat"];         // 45.67
+    bool retrievedBool = docInput["myBool"];            // true
 
     /* Print the deserialized input */
     Serial.print("Retrieved String:\t");
@@ -102,7 +136,7 @@ void setup() {
     Serial.println(retrievedBool);
   }
 
-  /* Remove example data from Firebase */
+  // Remove the example data from Firebase
   fb.remove("Example");
 }
 

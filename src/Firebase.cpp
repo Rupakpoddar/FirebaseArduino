@@ -52,8 +52,9 @@ void Firebase::connect_to_host() {
 }
 
 int Firebase::setString(String path, String data) {
-  String _data = "\"" + data + "\"";
-  return this->set(path, _data);
+  // Add quotes around the data string
+  data = "\"" + data + "\"";
+  return this->set(path, data);
 }
 
 int Firebase::setInt(String path, int data) {
@@ -66,6 +67,15 @@ int Firebase::setFloat(String path, float data) {
 
 int Firebase::setBool(String path, bool data) {
   return this->set(path, data ? "true" : "false");
+}
+
+int Firebase::setJson(String path, String data) {
+  // Check if the data string has leading and trailing quotes
+  if (data.startsWith("\"") && data.endsWith("\"")) {
+    // Remove the leading and trailing quotes from the data string
+    data = data.substring(1, data.length() - 1);
+  }
+  return this->set(path, data);
 }
 
 int Firebase::set(String path, String msg) {
@@ -121,8 +131,9 @@ int Firebase::set(String path, String msg) {
 }
 
 int Firebase::pushString(String path, String data) {
-  String _data = "\"" + data + "\"";
-  return this->push(path, _data);
+  // Add quotes around the data string
+  data = "\"" + data + "\"";
+  return this->push(path, data);
 }
 
 int Firebase::pushInt(String path, int data) {
@@ -135,6 +146,15 @@ int Firebase::pushFloat(String path, float data) {
 
 int Firebase::pushBool(String path, bool data) {
   return this->push(path, data ? "true" : "false");
+}
+
+int Firebase::pushJson(String path, String data) {
+  // Check if the data string has leading and trailing quotes
+  if (data.startsWith("\"") && data.endsWith("\"")) {
+    // Remove the leading and trailing quotes from the data string
+    data = data.substring(1, data.length() - 1);
+  }
+  return this->push(path, data);
 }
 
 int Firebase::push(String path, String msg) {
@@ -203,6 +223,16 @@ float Firebase::getFloat(String path) {
 
 bool Firebase::getBool(String path) {
   return this->get(path) == "true";
+}
+
+String Firebase::getJson(String path) {
+  String response = this->get(path);
+  // Check if the response string has leading and trailing quotes
+  if (response.startsWith("\"") && response.endsWith("\"")) {
+    // Remove the leading and trailing quotes from the response string
+    response = response.substring(1, response.length() - 1);
+  }
+  return response;
 }
 
 String Firebase::get(String path) {

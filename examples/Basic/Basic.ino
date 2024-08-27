@@ -74,10 +74,10 @@ void setup() {
         - 200 indicates success.
         - Other codes indicate failure.
   */
-  fb.setString("Example/setString", "Hello World!");
-  fb.setInt("Example/setInt", 123);
-  fb.setFloat("Example/setFloat", 45.67);
-  fb.setBool("Example/setBool", true);
+  fb.setString("Example/myString", "Hello World!");
+  fb.setInt("Example/myInt", 123);
+  fb.setFloat("Example/myFloat", 45.67);
+  fb.setBool("Example/myBool", true);
 
   /*
     Push String, Int, Float, or Bool in Firebase
@@ -106,19 +106,19 @@ void setup() {
       - The value retrieved from Firebase as a String, Int, Float, or Bool.
       - If the HTTP response code is not 200, returns NULL (for String) or 0 (for Int, Float, Bool).
   */
-  String retrievedString = fb.getString("Example/setString");
+  String retrievedString = fb.getString("Example/myString");
   Serial.print("Retrieved String:\t");
   Serial.println(retrievedString);
 
-  int retrievedInt = fb.getInt("Example/setInt");
+  int retrievedInt = fb.getInt("Example/myInt");
   Serial.print("Retrieved Int:\t\t");
   Serial.println(retrievedInt);
 
-  float retrievedFloat = fb.getFloat("Example/setFloat");
+  float retrievedFloat = fb.getFloat("Example/myFloat");
   Serial.print("Retrieved Float:\t");
   Serial.println(retrievedFloat);
 
-  bool retrievedBool = fb.getBool("Example/setBool");
+  bool retrievedBool = fb.getBool("Example/myBool");
   Serial.print("Retrieved Bool:\t\t");
   Serial.println(retrievedBool);
 

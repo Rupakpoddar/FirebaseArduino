@@ -49,14 +49,17 @@
 			int setInt(String path, int data);
 			int setFloat(String path, float data);
 			int setBool(String path, bool data);
+			int setJson(String path, String data);
 			int pushString(String path, String data);
 			int pushInt(String path, int data);
 			int pushFloat(String path, float data);
 			int pushBool(String path, bool data);
+			int pushJson(String path, String data);
 			String getString(String path);
 			int getInt(String path);
 			float getFloat(String path);
 			bool getBool(String path);
+			String getJson(String path);
 			int remove(String path);
 
 		private:
