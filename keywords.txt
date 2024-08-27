@@ -1,21 +1,21 @@
-Firebase	KEYWORD1
+Firebase    KEYWORD1
 
-setString	KEYWORD2
-setInt		KEYWORD2
-setFloat	KEYWORD2
+setString   KEYWORD2
+setInt      KEYWORD2
+setFloat    KEYWORD2
 setBool     KEYWORD2
 setJson     KEYWORD2
 
-pushString	KEYWORD2
-pushInt		KEYWORD2
-pushFloat	KEYWORD2
+pushString  KEYWORD2
+pushInt     KEYWORD2
+pushFloat   KEYWORD2
 pushBool    KEYWORD2
 pushJson    KEYWORD2
 
-getString	KEYWORD2
-getInt		KEYWORD2
-getFloat	KEYWORD2
+getString   KEYWORD2
+getInt      KEYWORD2
+getFloat    KEYWORD2
 getBool     KEYWORD2
 getJson     KEYWORD2
 
-remove  	KEYWORD2
+remove      KEYWORD2
