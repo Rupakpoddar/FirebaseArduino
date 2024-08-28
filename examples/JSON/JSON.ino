@@ -32,9 +32,9 @@
   https://arduinojson.org/v7/assistant/
 */
 
-#include <ArduinoJson.h>
-#include <Firebase.h>
 #include "secrets.h"
+#include <Firebase.h>
+#include <ArduinoJson.h>
 
 /* Use the following instance for Test Mode (No Authentication) */
 Firebase fb(REFERENCE_URL);
