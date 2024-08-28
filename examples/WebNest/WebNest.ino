@@ -127,7 +127,7 @@ void loop() {
   Serial.print("\t\t");
   Serial.print(pedestalFan->getState());
   Serial.print("\t");
-  Serial.print(ambienceLight->getTemperature());
+  Serial.print(pedestalFan->getTemperature());
   Serial.print("\t");
   Serial.print(pedestalFan->getPWM());
   Serial.print("\t");
