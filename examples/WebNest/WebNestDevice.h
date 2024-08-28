@@ -7,8 +7,8 @@
   https://www.arduino.cc/reference/en/libraries/arduinojson/
 */
 
-#include <ArduinoJson.h>
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 #define MAX_DEVICES 16
 
