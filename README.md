@@ -13,6 +13,7 @@ This Arduino library enables seamless connectivity with Firebase Realtime Databa
 - **Full Database Control**: Easily read, write, update, and delete data.
 - **JSON Support**: Compatible with JSON format and integrates with ArduinoJson library.
 - **Arduino Cloud Support**: Available for use in Arduino Cloud projects.
+- **WebNest Integration**: Compatible with [WebNest](https://rupakpoddar.github.io/WebNest/) for enhanced web-based control and monitoring.
 
 ---
 
