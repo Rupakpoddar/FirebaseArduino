@@ -1,23 +1,20 @@
 /*
   ---------------------------------
-  IMPORTANT: Configuration Reminder
+  IMPORTANT: CONFIGURATION REQUIRED
   ---------------------------------
   
   Before running this code, make sure to check the "secrets.h" file
-  for important configuration details such as Wi-Fi credentials and 
+  for important configuration details such as WiFi credentials and 
   Firebase settings.
 
   The "secrets.h" file should include:
-  - Your Wi-Fi SSID and Password
+  - Your WiFi SSID and Password
   - Your Firebase Realtime Database URL
   - (OPTIONAL) Firebase Authentication Token
 
   Ensure that "secrets.h" is properly configured and includes the correct
   information for your project. Failure to do so may result in connection
   errors or incorrect behavior of your application.
-
-  Note: The "secrets.h" file should be located in the same directory as
-  this sketch.
 */
 
 #include "secrets.h"
