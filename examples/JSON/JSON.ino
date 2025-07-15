@@ -17,18 +17,6 @@
   errors or incorrect behavior of your application.
 */
 
-/*
-  ---------------------------------
-      INFO: ArduinoJson Library   
-  ---------------------------------
-
-  Download ArduinoJson library from the Library Manager:
-  https://www.arduino.cc/reference/en/libraries/arduinojson/
-
-  For guidance on serialization and deserialization, visit:
-  https://arduinojson.org/v7/assistant/
-*/
-
 #include "secrets.h"
 #include <Firebase.h>
 #include <ArduinoJson.h>
@@ -40,70 +28,116 @@ Firebase fb(REFERENCE_URL);
 // Firebase fb(REFERENCE_URL, AUTH_TOKEN);
 
 void setup() {
-  Serial.begin(115200);
-  #if !defined(ARDUINO_UNOWIFIR4)
-    WiFi.mode(WIFI_STA);
-  #else
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
-  #endif
-  WiFi.disconnect();
-  delay(1000);
+    Serial.begin(115200);
+    
+    // Board-specific initialization
+    #if !defined(ARDUINO_UNOWIFIR4)
+        WiFi.mode(WIFI_STA);
+    #else
+        pinMode(LED_BUILTIN, OUTPUT);
+        digitalWrite(LED_BUILTIN, LOW);
+    #endif
+    
+    WiFi.disconnect();
+    delay(1000);
 
-  /* Connect to WiFi */
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to: ");
-  Serial.println(WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    /* Connect to WiFi */
+    Serial.println();
+    Serial.println();
+    Serial.print("Connecting to: ");
+    Serial.println(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print("-");
-    delay(500);
-  }
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print("-");
+        delay(500);
+    }
 
-  Serial.println();
-  Serial.println("WiFi Connected");
-  Serial.println();
+    Serial.println();
+    Serial.println("WiFi Connected");
+    Serial.println();
 
-  #if defined(ARDUINO_UNOWIFIR4)
-    digitalWrite(LED_BUILTIN, HIGH);
-  #endif
+    // Turn on built-in LED for UNO R4 WiFi
+    #if defined(ARDUINO_UNOWIFIR4)
+        digitalWrite(LED_BUILTIN, HIGH);
+    #endif
 
-  /* ----- */ 
+    /* ===== JSON SERIALIZATION: CREATE AND SEND DATA ===== */
+    
+    Serial.println("Creating JSON data...");
+    
+    /*
+      For guidance on serialization and deserialization, visit:
+      https://arduinojson.org/v7/assistant/
+    */
 
-  /* ----- Serialization: Set example data in Firebase ----- */
+    // Create a JSON document to hold the output data
+    JsonDocument docOutput;
 
-  // Create a JSON document to hold the output data
-  JsonDocument docOutput;
+    // Add various data types to the JSON document
+    docOutput["myString"] = "Hello World!";
+    docOutput["myInt"] = 123;
+    docOutput["myFloat"] = 45.67;
+    docOutput["myBool"] = true;
 
-  // Add various data types to the JSON document
-  docOutput["myString"] = "Hello World!";
-  docOutput["myInt"] = 123;
-  docOutput["myFloat"] = 45.67;
-  docOutput["myBool"] = true;
+    // You can also create nested objects
+    JsonObject sensor = docOutput.createNestedObject("sensor");
+    sensor["temperature"] = 25.6;
+    sensor["humidity"] = 60.3;
+    sensor["status"] = "active";
 
-  // Create a string to hold the serialized JSON data
-  String output;
+    // Create a string to hold the serialized JSON data
+    String output;
 
-  // Optional: Shrink the JSON document to fit its contents exactly
-  docOutput.shrinkToFit();
+    // Optional: Shrink the JSON document to fit its contents exactly
+    docOutput.shrinkToFit();
 
-  // Serialize the JSON document to a string
-  serializeJson(docOutput, output);
+    // Serialize the JSON document to a string
+    serializeJson(docOutput, output);
 
-  // Set the serialized JSON data in Firebase
-  fb.setJson("Example", output);
+    Serial.println("JSON data created:");
+    Serial.println(output);
+    Serial.println();
 
-  /* ----- Deserialization: Retrieve example data from Firebase ----- */
+    // Set the serialized JSON data in Firebase
+    Serial.println("Sending JSON to Firebase...");
+    int responseCode = fb.setJson("Example", output);
+    Serial.print("Set JSON - Response Code: ");
+    Serial.println(responseCode);
 
-  // Retrieve the serialized JSON data from Firebase
-  String input = fb.getJson("Example");
+    if (responseCode == 200) {
+        Serial.println("JSON data successfully sent to Firebase!");
+    } else {
+        Serial.println("Failed to send JSON data to Firebase!");
+        Serial.print("Response code ");
+        Serial.print(responseCode);
+        Serial.println(" indicates an error occurred.");
+        return; // Exit if we can't send data
+    }
 
-  // Check if the retrieved data is "NULL", indicating a retrieval error
-  if (input == "NULL") {
-    Serial.println("Could not retrieve data from Firebase");
-  } else {
+    Serial.println();
+
+    /* ===== JSON DESERIALIZATION: RETRIEVE AND PARSE DATA ===== */
+    
+    Serial.println("Retrieving JSON from Firebase...");
+
+    // Retrieve the serialized JSON data from Firebase
+    String input = fb.getJson("Example");
+
+    // Check if the retrieved data is "NULL", indicating a retrieval error
+    if (input == "NULL") {
+        Serial.println("Could not retrieve data from Firebase");
+        Serial.println("This might be due to:");
+        Serial.println("- Network connectivity issues");
+        Serial.println("- Incorrect Firebase URL or path");
+        Serial.println("- Authentication problems");
+        return;
+    }
+
+    Serial.println("JSON data retrieved:");
+    Serial.println(input);
+    Serial.println();
+
     // Create a JSON document to hold the deserialized data
     JsonDocument docInput;
 
@@ -111,32 +145,69 @@ void setup() {
     DeserializationError error = deserializeJson(docInput, input);
 
     if (error) {
-      Serial.print("deserializeJson() failed: ");
-      Serial.println(error.c_str());
-      return;
+        Serial.print("deserializeJson() failed: ");
+        Serial.println(error.c_str());
+        return;
     }
 
+    Serial.println("Parsing JSON data...");
+
     // Extract the values from the deserialized JSON document
-    const char* retrievedString = docInput["myString"]; // "Hello World!"
-    int retrievedInt = docInput["myInt"];               // 123
-    float retrievedFloat = docInput["myFloat"];         // 45.67
-    bool retrievedBool = docInput["myBool"];            // true
+    const char* retrievedString = docInput["myString"];   // "Hello World!"
+    int retrievedInt = docInput["myInt"];                 // 123
+    float retrievedFloat = docInput["myFloat"];           // 45.67
+    bool retrievedBool = docInput["myBool"];              // true
 
-    /* Print the deserialized input */
-    Serial.print("Retrieved String:\t");
+    // Extract nested object values
+    float temperature = docInput["sensor"]["temperature"]; // 25.6
+    float humidity = docInput["sensor"]["humidity"];       // 60.3
+    const char* status = docInput["sensor"]["status"];     // "active"
+
+    /* Print the deserialized data */
+    Serial.println("--- Parsed Data ---");
+    Serial.print("Retrieved String: ");
     Serial.println(retrievedString);
-    Serial.print("Retrieved Int:\t\t");
+    Serial.print("Retrieved Int: ");
     Serial.println(retrievedInt);
-    Serial.print("Retrieved Float:\t");
+    Serial.print("Retrieved Float: ");
     Serial.println(retrievedFloat);
-    Serial.print("Retrieved Bool:\t\t");
+    Serial.print("Retrieved Bool: ");
     Serial.println(retrievedBool);
-  }
+    
+    Serial.println("--- Sensor Data ---");
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.println("°C");
+    Serial.print("Humidity: ");
+    Serial.print(humidity);
+    Serial.println("%");
+    Serial.print("Status: ");
+    Serial.println(status);
 
-  // Remove the example data from Firebase
-  fb.remove("Example");
+    Serial.println();
+
+    /* ===== CLEANUP ===== */
+    
+    Serial.println("Cleaning up...");
+    
+    // Remove the example data from Firebase
+    responseCode = fb.remove("Example");
+    Serial.print("Remove Example - Response Code: ");
+    Serial.println(responseCode);
+
+    if (responseCode == 200) {
+        Serial.println("Example data successfully removed from Firebase!");
+    } else {
+        Serial.println("Failed to remove example data from Firebase!");
+        Serial.print("Response code ");
+        Serial.print(responseCode);
+        Serial.println(" indicates an error occurred.");
+    }
+
+    Serial.println();
+    Serial.println("JSON example completed!");
 }
 
 void loop() {
-  // Nothing
+    // Nothing to do here
 }

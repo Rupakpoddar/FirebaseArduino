@@ -1,337 +1,437 @@
-/*
-
-	MIT License
-
-	Copyright (c) 2024 Rupak Poddar
-
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
-
-	The above copyright notice and this permission notice shall be included in all
-	copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-	SOFTWARE.
-
-*/
-
 #include "Firebase.h"
 
+/**
+ * Constructor for Firebase class
+ * @param referenceURL The Firebase Realtime Database URL
+ * @param authToken Optional authentication token for secured access
+ */
 Firebase::Firebase(String referenceURL, String authToken) {
-	_host = referenceURL;
-  _authToken = authToken;
+    _host = referenceURL;
+    _authToken = authToken;
 
-  if (_host.startsWith("https://")) {
-    _host.remove(0, 8);
-  }
+    // Remove protocol prefix if present
+    if (_host.startsWith("https://")) {
+        _host.remove(0, 8);
+    }
 
-  if (_host.endsWith("/")) {
-    _host.remove(_host.length() - 1);
-  }
-  
-  #if !defined(ARDUINO_UNOWIFIR4)
-      _httpsClient.setInsecure();
-  #endif
+    // Remove trailing slash if present
+    if (_host.endsWith("/")) {
+        _host.remove(_host.length() - 1);
+    }
+    
+    // Set insecure mode for non-UNO R4 boards
+    #if !defined(ARDUINO_UNOWIFIR4)
+        _httpsClient.setInsecure();
+    #endif
 }
 
+/**
+ * Establish connection to Firebase host
+ * Retries up to 30 times with 100ms delays
+ */
 void Firebase::connect_to_host() {
-	int r = 0;
-  while((!_httpsClient.connect(_host.c_str(), PORT)) && (r < 30)) {
-      delay(100);
-      r++;
-  }
+    int retries = 0;
+    while ((!_httpsClient.connect(_host.c_str(), PORT)) && (retries < 30)) {
+        delay(100);
+        retries++;
+    }
 }
 
+/**
+ * Set a string value at the specified path
+ * @param path Firebase path to store the data
+ * @param data String value to store
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::setString(String path, String data) {
-  // Add quotes around the data string
-  data = "\"" + data + "\"";
-  return this->set(path, data);
+    // Add quotes around the data string for JSON format
+    data = "\"" + data + "\"";
+    return this->set(path, data);
 }
 
+/**
+ * Set an integer value at the specified path
+ * @param path Firebase path to store the data
+ * @param data Integer value to store
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::setInt(String path, int data) {
-  return this->set(path, String(data));
+    return this->set(path, String(data));
 }
 
+/**
+ * Set a float value at the specified path
+ * @param path Firebase path to store the data
+ * @param data Float value to store
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::setFloat(String path, float data) {
-  return this->set(path, String(data));
+    return this->set(path, String(data));
 }
 
+/**
+ * Set a boolean value at the specified path
+ * @param path Firebase path to store the data
+ * @param data Boolean value to store
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::setBool(String path, bool data) {
-  return this->set(path, data ? "true" : "false");
+    return this->set(path, data ? "true" : "false");
 }
 
+/**
+ * Set a JSON object at the specified path
+ * @param path Firebase path to store the data
+ * @param data JSON string to store
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::setJson(String path, String data) {
-  // Check if the data string has leading and trailing quotes
-  if (data.startsWith("\"") && data.endsWith("\"")) {
-    // Remove the leading and trailing quotes from the data string
-    data = data.substring(1, data.length() - 1);
-  }
-  return this->set(path, data);
+    // Remove quotes if present (JSON objects shouldn't be quoted)
+    if (data.startsWith("\"") && data.endsWith("\"")) {
+        data = data.substring(1, data.length() - 1);
+    }
+    return this->set(path, data);
 }
 
+/**
+ * Internal method to set data using HTTP PUT request
+ * @param path Firebase path
+ * @param msg Data to send
+ * @return HTTP response code
+ */
 int Firebase::set(String path, String msg) {
-	connect_to_host();
+    connect_to_host();
 
-  String jsonObject = "";
-  if (_authToken != "") {
-    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
-  } else {
-    jsonObject = String("/") + path + String(".json");
-  }
-
-  _httpsClient.print(String("PUT ") + jsonObject + " HTTP/1.1\r\n" +
-          "Host: " + _host + "\r\n" +
-          "Connection: close\r\n" +
-          "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
-          "Content-Type: application/json;charset=utf-8\r\n" +
-          "Content-Length: " + msg.length() + "\r\n" +
-          "\r\n" +
-          msg + "\r\n");
-
-  String responseLine;
-  int responseCode = 0;
-  bool headersEnded = false;
-
-  while (_httpsClient.connected() || _httpsClient.available()) {
-    if (_httpsClient.available()) {
-      responseLine = _httpsClient.readStringUntil('\n');
-      responseLine.trim();  // Remove any leading or trailing whitespace
-
-      if (!headersEnded) {
-        // Check for the status line
-        if (responseLine.startsWith("HTTP/")) {
-          int firstSpace = responseLine.indexOf(' ');
-          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
-
-          if (firstSpace > 0 && secondSpace > 0) {
-            responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
-          }
-        }
-        
-        // End of headers
-        if (responseLine.length() == 0) {
-          headersEnded = true;
-        }
-      }
+    // Build the JSON endpoint URL
+    String jsonObject = "";
+    if (_authToken != "") {
+        jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+    } else {
+        jsonObject = String("/") + path + String(".json");
     }
-  }
 
-  // Return the response code
-  return responseCode;
+    // Send HTTP PUT request
+    _httpsClient.print(String("PUT ") + jsonObject + " HTTP/1.1\r\n" +
+                      "Host: " + _host + "\r\n" +
+                      "Connection: close\r\n" +
+                      "Accept: */*\r\n" +
+                      "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
+                      "Content-Type: application/json;charset=utf-8\r\n" +
+                      "Content-Length: " + msg.length() + "\r\n" +
+                      "\r\n" +
+                      msg + "\r\n");
+
+    // Parse response to extract status code
+    String responseLine;
+    int responseCode = 0;
+    bool headersEnded = false;
+
+    while (_httpsClient.connected() || _httpsClient.available()) {
+        if (_httpsClient.available()) {
+            responseLine = _httpsClient.readStringUntil('\n');
+            responseLine.trim();
+
+            if (!headersEnded) {
+                // Extract status code from HTTP response line
+                if (responseLine.startsWith("HTTP/")) {
+                    int firstSpace = responseLine.indexOf(' ');
+                    int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+
+                    if (firstSpace > 0 && secondSpace > 0) {
+                        responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+                    }
+                }
+                
+                // Check for end of headers
+                if (responseLine.length() == 0) {
+                    headersEnded = true;
+                }
+            }
+        }
+    }
+
+    return responseCode;
 }
 
+/**
+ * Push a string value to the specified path (creates unique key)
+ * @param path Firebase path to push the data
+ * @param data String value to push
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::pushString(String path, String data) {
-  // Add quotes around the data string
-  data = "\"" + data + "\"";
-  return this->push(path, data);
+    // Add quotes around the data string for JSON format
+    data = "\"" + data + "\"";
+    return this->push(path, data);
 }
 
+/**
+ * Push an integer value to the specified path (creates unique key)
+ * @param path Firebase path to push the data
+ * @param data Integer value to push
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::pushInt(String path, int data) {
-  return this->push(path, String(data));
+    return this->push(path, String(data));
 }
 
+/**
+ * Push a float value to the specified path (creates unique key)
+ * @param path Firebase path to push the data
+ * @param data Float value to push
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::pushFloat(String path, float data) {
-  return this->push(path, String(data));
+    return this->push(path, String(data));
 }
 
+/**
+ * Push a boolean value to the specified path (creates unique key)
+ * @param path Firebase path to push the data
+ * @param data Boolean value to push
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::pushBool(String path, bool data) {
-  return this->push(path, data ? "true" : "false");
+    return this->push(path, data ? "true" : "false");
 }
 
+/**
+ * Push a JSON object to the specified path (creates unique key)
+ * @param path Firebase path to push the data
+ * @param data JSON string to push
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::pushJson(String path, String data) {
-  // Check if the data string has leading and trailing quotes
-  if (data.startsWith("\"") && data.endsWith("\"")) {
-    // Remove the leading and trailing quotes from the data string
-    data = data.substring(1, data.length() - 1);
-  }
-  return this->push(path, data);
+    // Remove quotes if present (JSON objects shouldn't be quoted)
+    if (data.startsWith("\"") && data.endsWith("\"")) {
+        data = data.substring(1, data.length() - 1);
+    }
+    return this->push(path, data);
 }
 
+/**
+ * Internal method to push data using HTTP POST request
+ * @param path Firebase path
+ * @param msg Data to send
+ * @return HTTP response code
+ */
 int Firebase::push(String path, String msg) {
-	connect_to_host();
+    connect_to_host();
 
-  String jsonObject = "";
-  if (_authToken != "") {
-    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
-  } else {
-    jsonObject = String("/") + path + String(".json");
-  }
-
-  _httpsClient.print(String("POST ") + jsonObject + " HTTP/1.1\r\n" +
-          "Host: " + _host + "\r\n" +
-          "Connection: close\r\n" +
-          "Accept: */*\r\n" +
-          "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
-          "Content-Type: application/json;charset=utf-8\r\n" +
-          "Content-Length: " + msg.length() + "\r\n" +
-          "\r\n" +
-          msg + "\r\n");
-
-  String responseLine;
-  int responseCode = 0;
-  bool headersEnded = false;
-
-  while (_httpsClient.connected() || _httpsClient.available()) {
-    if (_httpsClient.available()) {
-      responseLine = _httpsClient.readStringUntil('\n');
-      responseLine.trim();  // Remove any leading or trailing whitespace
-
-      if (!headersEnded) {
-        // Check for the status line
-        if (responseLine.startsWith("HTTP/")) {
-          int firstSpace = responseLine.indexOf(' ');
-          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
-
-          if (firstSpace > 0 && secondSpace > 0) {
-            responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
-          }
-        }
-        
-        // End of headers
-        if (responseLine.length() == 0) {
-          headersEnded = true;
-        }
-      }
+    // Build the JSON endpoint URL
+    String jsonObject = "";
+    if (_authToken != "") {
+        jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+    } else {
+        jsonObject = String("/") + path + String(".json");
     }
-  }
 
-  // Return the response code
-  return responseCode;
+    // Send HTTP POST request
+    _httpsClient.print(String("POST ") + jsonObject + " HTTP/1.1\r\n" +
+                      "Host: " + _host + "\r\n" +
+                      "Connection: close\r\n" +
+                      "Accept: */*\r\n" +
+                      "User-Agent: Mozilla/4.0 (compatible; Arduino Device; Windows NT 5.1)\r\n" +
+                      "Content-Type: application/json;charset=utf-8\r\n" +
+                      "Content-Length: " + msg.length() + "\r\n" +
+                      "\r\n" +
+                      msg + "\r\n");
+
+    // Parse response to extract status code
+    String responseLine;
+    int responseCode = 0;
+    bool headersEnded = false;
+
+    while (_httpsClient.connected() || _httpsClient.available()) {
+        if (_httpsClient.available()) {
+            responseLine = _httpsClient.readStringUntil('\n');
+            responseLine.trim();
+
+            if (!headersEnded) {
+                // Extract status code from HTTP response line
+                if (responseLine.startsWith("HTTP/")) {
+                    int firstSpace = responseLine.indexOf(' ');
+                    int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+
+                    if (firstSpace > 0 && secondSpace > 0) {
+                        responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+                    }
+                }
+                
+                // Check for end of headers
+                if (responseLine.length() == 0) {
+                    headersEnded = true;
+                }
+            }
+        }
+    }
+
+    return responseCode;
 }
 
+/**
+ * Get a string value from the specified path
+ * @param path Firebase path to retrieve data from
+ * @return String value or "NULL" if failed
+ */
 String Firebase::getString(String path) {
-  return this->get(path);
+    return this->get(path);
 }
 
+/**
+ * Get an integer value from the specified path
+ * @param path Firebase path to retrieve data from
+ * @return Integer value or 0 if failed
+ */
 int Firebase::getInt(String path) {
-  return this->get(path).toInt();
+    return this->get(path).toInt();
 }
 
+/**
+ * Get a float value from the specified path
+ * @param path Firebase path to retrieve data from
+ * @return Float value or 0.0 if failed
+ */
 float Firebase::getFloat(String path) {
-  return this->get(path).toFloat();
+    return this->get(path).toFloat();
 }
 
+/**
+ * Get a boolean value from the specified path
+ * @param path Firebase path to retrieve data from
+ * @return Boolean value or false if failed
+ */
 bool Firebase::getBool(String path) {
-  return this->get(path) == "true";
+    return this->get(path) == "true";
 }
 
+/**
+ * Get a JSON object from the specified path
+ * @param path Firebase path to retrieve data from
+ * @return JSON string or "NULL" if failed
+ */
 String Firebase::getJson(String path) {
-  String response = this->get(path);
-  // Check if the response string has leading and trailing quotes
-  if (response.startsWith("\"") && response.endsWith("\"")) {
-    // Remove the leading and trailing quotes from the response string
-    response = response.substring(1, response.length() - 1);
-  }
-  return response;
+    String response = this->get(path);
+    // Remove quotes if present (JSON objects come quoted from Firebase)
+    if (response.startsWith("\"") && response.endsWith("\"")) {
+        response = response.substring(1, response.length() - 1);
+    }
+    return response;
 }
 
+/**
+ * Internal method to get data using HTTP GET request
+ * @param path Firebase path
+ * @return Retrieved data or "NULL" if failed
+ */
 String Firebase::get(String path) {
-	connect_to_host();
+    connect_to_host();
 
-  String jsonObject = "";
-  if (_authToken != "") {
-    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
-  } else {
-    jsonObject = String("/") + path + String(".json");
-  }
-
-  _httpsClient.print(String("GET ") + jsonObject + " HTTP/1.1\r\n" +
-               "Host: " + _host + "\r\n" +
-               "Connection: close\r\n\r\n");
-
-  String responseLine;
-  bool headersEnded = false;
-  String body = "";
-  int statusCode = 0;
-
-  while (_httpsClient.connected() || _httpsClient.available()) {
-    if (_httpsClient.available()) {
-      responseLine = _httpsClient.readStringUntil('\n');
-      responseLine.trim();  // Remove leading/trailing whitespace
-
-      if (!headersEnded) {
-        if (responseLine.length() == 0) {
-          // Empty line indicates end of headers
-          headersEnded = true;
-        } else if (responseLine.startsWith("HTTP/")) {
-          // Extract and optionally log status code if needed
-          int firstSpace = responseLine.indexOf(' ');
-          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
-          if (firstSpace > 0 && secondSpace > 0) {
-            statusCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
-          }
-        }
-      } else {
-        // Append body content
-        body += responseLine;
-      }
+    // Build the JSON endpoint URL
+    String jsonObject = "";
+    if (_authToken != "") {
+        jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+    } else {
+        jsonObject = String("/") + path + String(".json");
     }
-  }
 
-  if (statusCode != 200) {
-    return "NULL";
-  }
+    // Send HTTP GET request
+    _httpsClient.print(String("GET ") + jsonObject + " HTTP/1.1\r\n" +
+                      "Host: " + _host + "\r\n" +
+                      "Connection: close\r\n\r\n");
 
-  // Remove any potential extra quotes from the body
-  if (body.startsWith("\"") && body.endsWith("\"")) {
-    body = body.substring(1, body.length() - 1);
-  }
+    // Parse response
+    String responseLine;
+    bool headersEnded = false;
+    String body = "";
+    int statusCode = 0;
 
-  return body;
+    while (_httpsClient.connected() || _httpsClient.available()) {
+        if (_httpsClient.available()) {
+            responseLine = _httpsClient.readStringUntil('\n');
+            responseLine.trim();
+
+            if (!headersEnded) {
+                if (responseLine.length() == 0) {
+                    // Empty line indicates end of headers
+                    headersEnded = true;
+                } else if (responseLine.startsWith("HTTP/")) {
+                    // Extract status code
+                    int firstSpace = responseLine.indexOf(' ');
+                    int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+                    if (firstSpace > 0 && secondSpace > 0) {
+                        statusCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+                    }
+                }
+            } else {
+                // Append body content
+                body += responseLine;
+            }
+        }
+    }
+
+    // Return "NULL" if request failed
+    if (statusCode != 200) {
+        return "NULL";
+    }
+
+    // Remove quotes from simple values
+    if (body.startsWith("\"") && body.endsWith("\"")) {
+        body = body.substring(1, body.length() - 1);
+    }
+
+    return body;
 }
 
+/**
+ * Remove data from the specified path
+ * @param path Firebase path to remove data from
+ * @return HTTP response code (200 = success)
+ */
 int Firebase::remove(String path) {
-	connect_to_host();
+    connect_to_host();
 
-  String jsonObject = "";
-  if (_authToken != "") {
-    jsonObject = String("/") + path + String(".json?auth=") + _authToken;
-  } else {
-    jsonObject = String("/") + path + String(".json");
-  }
-
-  _httpsClient.print(String("DELETE ") + jsonObject + " HTTP/1.1\r\n" +
-               "Host: " + _host + "\r\n" +
-               "Connection: close\r\n\r\n");
-
-  String responseLine;
-  int responseCode = 0;
-  bool headersEnded = false;
-
-  while (_httpsClient.connected() || _httpsClient.available()) {
-    if (_httpsClient.available()) {
-      responseLine = _httpsClient.readStringUntil('\n');
-      responseLine.trim();  // Remove any leading or trailing whitespace
-
-      if (!headersEnded) {
-        // Check for the status line
-        if (responseLine.startsWith("HTTP/")) {
-          int firstSpace = responseLine.indexOf(' ');
-          int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
-
-          if (firstSpace > 0 && secondSpace > 0) {
-            responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
-          }
-        }
-        
-        // End of headers
-        if (responseLine.length() == 0) {
-          headersEnded = true;
-        }
-      }
+    // Build the JSON endpoint URL
+    String jsonObject = "";
+    if (_authToken != "") {
+        jsonObject = String("/") + path + String(".json?auth=") + _authToken;
+    } else {
+        jsonObject = String("/") + path + String(".json");
     }
-  }
 
-  // Return the response code
-  return responseCode;
+    // Send HTTP DELETE request
+    _httpsClient.print(String("DELETE ") + jsonObject + " HTTP/1.1\r\n" +
+                      "Host: " + _host + "\r\n" +
+                      "Connection: close\r\n\r\n");
+
+    // Parse response to extract status code
+    String responseLine;
+    int responseCode = 0;
+    bool headersEnded = false;
+
+    while (_httpsClient.connected() || _httpsClient.available()) {
+        if (_httpsClient.available()) {
+            responseLine = _httpsClient.readStringUntil('\n');
+            responseLine.trim();
+
+            if (!headersEnded) {
+                // Extract status code from HTTP response line
+                if (responseLine.startsWith("HTTP/")) {
+                    int firstSpace = responseLine.indexOf(' ');
+                    int secondSpace = responseLine.indexOf(' ', firstSpace + 1);
+
+                    if (firstSpace > 0 && secondSpace > 0) {
+                        responseCode = responseLine.substring(firstSpace + 1, secondSpace).toInt();
+                    }
+                }
+                
+                // Check for end of headers
+                if (responseLine.length() == 0) {
+                    headersEnded = true;
+                }
+            }
+        }
+    }
+
+    return responseCode;
 }

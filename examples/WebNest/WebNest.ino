@@ -33,19 +33,19 @@
 
   2. Configure Firebase URL:
      - Enter your Firebase Realtime Database URL in the header input field
-     - The input border will turn blue when connected
+     - The input border will turn blue when connected successfully
 
   3. Add Devices:
      - Click the "Add Device" button
      - Enter a device name (e.g., "Living Room Light")
      - Select an icon (icon1.png through icon5.png)
-     - Enable slider if you want brightness/speed control
+     - Enable slider if you want brightness/speed control (0-100%)
      - Click "Add Device" to save
 
   4. Firebase Configuration:
      - Ensure your Firebase Realtime Database is in "Test Mode" for proper
        read/write access during development
-     - Devices are stored under the /webnest key in Firebase
+     - Devices are automatically stored under the /webnest key in Firebase
 
   5. Upload to Board:
      - Configure your secrets.h file with WiFi and Firebase credentials
@@ -57,78 +57,112 @@
 #include "WebnestDevice.h"
 #include <Firebase.h>
 
-/* Webnest only supports Firebase in Test Mode */
+/* Webnest only supports Firebase in Test Mode (no authentication required) */
 Firebase fb(REFERENCE_URL);
 
-/* ----- Create Webnest devices ----- */
+/* ----- Create Webnest Device Objects ----- */
 WebnestDevice* livingRoomLight = new WebnestDevice("Living Room Light");
 WebnestDevice* bedroomFan = new WebnestDevice("Bedroom Fan");
 
+// Optional: Define pins for physical device control
+// #define LIGHT_PIN 5
+
 void setup() {
-  Serial.begin(115200);
-  #if !defined(ARDUINO_UNOWIFIR4)
-    WiFi.mode(WIFI_STA);
-  #else
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
-  #endif
-  WiFi.disconnect();
-  delay(1000);
+    Serial.begin(115200);
+    
+    // Board-specific initialization
+    #if !defined(ARDUINO_UNOWIFIR4)
+        WiFi.mode(WIFI_STA);
+    #else
+        pinMode(LED_BUILTIN, OUTPUT);
+        digitalWrite(LED_BUILTIN, LOW);
+    #endif
+    
+    WiFi.disconnect();
+    delay(1000);
 
-  /* Connect to WiFi */
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to: ");
-  Serial.println(WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    /* Connect to WiFi */
+    Serial.println();
+    Serial.println();
+    Serial.print("Connecting to: ");
+    Serial.println(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print("-");
-    delay(500);
-  }
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print("-");
+        delay(500);
+    }
 
-  Serial.println();
-  Serial.println("WiFi Connected");
-  Serial.println();
+    Serial.println();
+    Serial.println("WiFi Connected");
+    Serial.println();
 
-  #if defined(ARDUINO_UNOWIFIR4)
-    digitalWrite(LED_BUILTIN, HIGH);
-  #endif
+    // Turn on built-in LED for UNO R4 WiFi
+    #if defined(ARDUINO_UNOWIFIR4)
+        digitalWrite(LED_BUILTIN, HIGH);
+    #endif
+
+    /* Test Firebase connection */
+    Serial.println("Testing Firebase connection...");
+    String testData = fb.getString("webnest");
+    
+    if (testData == "NULL") {
+        Serial.println("Warning: Could not connect to Firebase or no devices found.");
+        Serial.println("Make sure to add devices using the Webnest web interface.");
+    } else {
+        Serial.println("Firebase connection successful!");
+    }
+    
+    Serial.println();
+
+    /* Optional: Setup physical device pins */
+    // pinMode(LIGHT_PIN, OUTPUT);
 }
 
 void loop() {
-  /* ----- Poll and update the device states from Firebase ----- */
-  WebnestDevice::poll(fb.getJson("webnest" /* Get all devices from webnest key */));
+    /* ----- Poll Firebase for device updates ----- */
+    String deviceData = fb.getJson("webnest");
+    
+    // Check if data retrieval was successful
+    if (deviceData == "NULL") {
+        Serial.println("Failed to retrieve device data from Firebase");
+        delay(5000); // Wait 5 seconds before retrying
+        return;
+    }
 
-  /* ----- Print updated values ----- */
-  Serial.println("Device Name\t\tState\tSlider\tValue");
-  Serial.println("---------------------------------------------");
+    // Update all device states with the retrieved data
+    WebnestDevice::poll(deviceData);
 
-  // For Living Room Light
-  Serial.print(livingRoomLight->getName());
-  Serial.print("\t");
-  Serial.print(livingRoomLight->getState() ? "ON" : "OFF");
-  Serial.print("\t");
-  Serial.print(livingRoomLight->getSliderEnabled() ? "Yes" : "No");
-  Serial.print("\t");
-  Serial.println(livingRoomLight->getSliderValue());
+    /* ----- Display device status ----- */
+    Serial.println("Device Name\t\tState\tSlider\tValue");
+    Serial.println("---------------------------------------------");
 
-  // For Bedroom Fan
-  Serial.print(bedroomFan->getName());
-  Serial.print("\t\t");
-  Serial.print(bedroomFan->getState() ? "ON" : "OFF");
-  Serial.print("\t");
-  Serial.print(bedroomFan->getSliderEnabled() ? "Yes" : "No");
-  Serial.print("\t");
-  Serial.println(bedroomFan->getSliderValue());
+    // Living Room Light
+    Serial.print(livingRoomLight->getName());
+    Serial.print("\t");
+    Serial.print(livingRoomLight->getState() ? "ON" : "OFF");
+    Serial.print("\t");
+    Serial.print(livingRoomLight->getSliderEnabled() ? "Yes" : "No");
+    Serial.print("\t");
+    Serial.println(livingRoomLight->getSliderValue());
 
-  Serial.println();
-  
-  /* Example: Control physical devices based on state */
-  // if (livingRoomLight->getState()) {
-  //   // Turn on the actual light
-  //   // analogWrite(LIGHT_PIN, map(livingRoomLight->getSliderValue(), 0, 100, 0, 255));
-  // }
-  
-  delay(1000);
+    // Bedroom Fan
+    Serial.print(bedroomFan->getName());
+    Serial.print("\t\t");
+    Serial.print(bedroomFan->getState() ? "ON" : "OFF");
+    Serial.print("\t");
+    Serial.print(bedroomFan->getSliderEnabled() ? "Yes" : "No");
+    Serial.print("\t");
+    Serial.println(bedroomFan->getSliderValue());
+
+    Serial.println();
+
+    /* Example: Control physical devices based on state */
+    // if (livingRoomLight->getState()) {
+    //   // Turn on the actual light
+    //   // analogWrite(LIGHT_PIN, map(livingRoomLight->getSliderValue(), 0, 100, 0, 255));
+    // }
+
+    // Wait 1 second before next update
+    delay(1000);
 }

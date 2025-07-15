@@ -1,0 +1,30 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Arduino build files
+*.hex
+*.elf
+*.bin
+*.eep
+
+# Arduino IDE backup files
+*.bak
+*.tmp
+
+# PlatformIO
+.pio/
+.vscode/
+
+# Library manager files
+*.zip
+
+# Logs
+*.log
+
+# Misc
+*.swp
+*.swo

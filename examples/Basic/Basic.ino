@@ -27,112 +27,175 @@ Firebase fb(REFERENCE_URL);
 // Firebase fb(REFERENCE_URL, AUTH_TOKEN);
 
 void setup() {
-  Serial.begin(115200);
-  #if !defined(ARDUINO_UNOWIFIR4)
-    WiFi.mode(WIFI_STA);
-  #else
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
-  #endif
-  WiFi.disconnect();
-  delay(1000);
-
-  /* Connect to WiFi */
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to: ");
-  Serial.println(WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print("-");
-    delay(500);
-  }
-
-  Serial.println();
-  Serial.println("WiFi Connected");
-  Serial.println();
-
-  #if defined(ARDUINO_UNOWIFIR4)
-    digitalWrite(LED_BUILTIN, HIGH);
-  #endif
-
-  /* ----- */ 
-
-  /*
-    Set String, Int, Float, or Bool in Firebase
+    Serial.begin(115200);
     
-    Parameters:
-      - path: The path in Firebase where the data will be stored.
-      - data: The value to set, which can be of type String, Int, Float, or Bool.
-
-    Returns:
-      - HTTP response code as an integer.
-        - 200 indicates success.
-        - Other codes indicate failure.
-  */
-  fb.setString("Example/myString", "Hello World!");
-  fb.setInt("Example/myInt", 123);
-  fb.setFloat("Example/myFloat", 45.67);
-  fb.setBool("Example/myBool", true);
-
-  /*
-    Push String, Int, Float, or Bool in Firebase
+    // Board-specific initialization
+    #if !defined(ARDUINO_UNOWIFIR4)
+        WiFi.mode(WIFI_STA);
+    #else
+        pinMode(LED_BUILTIN, OUTPUT);
+        digitalWrite(LED_BUILTIN, LOW);
+    #endif
     
-    Parameters:
-      - path: The path in Firebase where the data will be stored.
-      - data: The value to push, which can be of type String, Int, Float, or Bool.
+    WiFi.disconnect();
+    delay(1000);
 
-    Returns:
-      - HTTP response code as an integer.
-        - 200 indicates success.
-        - Other codes indicate failure.
-  */
-  fb.pushString("Push", "Foo-Bar");
-  fb.pushInt("Push", 890);
-  fb.pushFloat("Push", 12.34);
-  fb.pushBool("Push", false);
+    /* Connect to WiFi */
+    Serial.println();
+    Serial.println();
+    Serial.print("Connecting to: ");
+    Serial.println(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  /*
-    Get String, Int, Float, or Bool from Firebase
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print("-");
+        delay(500);
+    }
+
+    Serial.println();
+    Serial.println("WiFi Connected");
+    Serial.println();
+
+    // Turn on built-in LED for UNO R4 WiFi
+    #if defined(ARDUINO_UNOWIFIR4)
+        digitalWrite(LED_BUILTIN, HIGH);
+    #endif
+
+    /* ===== SETTING DATA IN FIREBASE ===== */
     
-    Parameters:
-      - path: The path in Firebase from which the data will be retrieved.
-
-    Returns:
-      - The value retrieved from Firebase as a String, Int, Float, or Bool.
-      - If the HTTP response code is not 200, returns NULL (for String) or 0 (for Int, Float, Bool).
-  */
-  String retrievedString = fb.getString("Example/myString");
-  Serial.print("Retrieved String:\t");
-  Serial.println(retrievedString);
-
-  int retrievedInt = fb.getInt("Example/myInt");
-  Serial.print("Retrieved Int:\t\t");
-  Serial.println(retrievedInt);
-
-  float retrievedFloat = fb.getFloat("Example/myFloat");
-  Serial.print("Retrieved Float:\t");
-  Serial.println(retrievedFloat);
-
-  bool retrievedBool = fb.getBool("Example/myBool");
-  Serial.print("Retrieved Bool:\t\t");
-  Serial.println(retrievedBool);
-
-  /*
-    Remove Data from Firebase
+    Serial.println("Setting data in Firebase...");
     
-    Parameters:
-      - path: The path in Firebase from which the data will be removed.
+    /*
+      Set String, Int, Float, or Bool in Firebase
+      
+      Parameters:
+        - path: The path in Firebase where the data will be stored
+        - data: The value to set (String, Int, Float, or Bool)
 
-    Returns:
-      - HTTP response code as an integer.
-        - 200 indicates success.
-        - Other codes indicate failure.
-  */
-  fb.remove("Example");
+      Returns:
+        - HTTP response code as an integer
+          - 200: Success
+          - 400: Bad Request
+          - 401: Unauthorized
+          - 403: Forbidden
+          - 404: Not Found
+          - Other codes indicate various errors
+    */
+    
+    int responseCode;
+    
+    responseCode = fb.setString("Example/myString", "Hello World!");
+    Serial.print("Set String - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.setInt("Example/myInt", 123);
+    Serial.print("Set Int - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.setFloat("Example/myFloat", 45.67);
+    Serial.print("Set Float - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.setBool("Example/myBool", true);
+    Serial.print("Set Bool - Response Code: ");
+    Serial.println(responseCode);
+
+    Serial.println();
+
+    /* ===== PUSHING DATA TO FIREBASE ===== */
+    
+    Serial.println("Pushing data to Firebase...");
+    
+    /*
+      Push String, Int, Float, or Bool to Firebase
+      
+      Push creates a unique key for each entry, unlike set which overwrites.
+      
+      Parameters:
+        - path: The path in Firebase where the data will be stored
+        - data: The value to push (String, Int, Float, or Bool)
+
+      Returns:
+        - HTTP response code as an integer (200 = success)
+    */
+    
+    responseCode = fb.pushString("Push", "Foo-Bar");
+    Serial.print("Push String - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.pushInt("Push", 890);
+    Serial.print("Push Int - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.pushFloat("Push", 12.34);
+    Serial.print("Push Float - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.pushBool("Push", false);
+    Serial.print("Push Bool - Response Code: ");
+    Serial.println(responseCode);
+
+    Serial.println();
+
+    /* ===== GETTING DATA FROM FIREBASE ===== */
+    
+    Serial.println("Getting data from Firebase...");
+    
+    /*
+      Get String, Int, Float, or Bool from Firebase
+      
+      Parameters:
+        - path: The path in Firebase from which the data will be retrieved
+
+      Returns:
+        - The value retrieved from Firebase
+        - Returns "NULL" (String), 0 (Int/Float), or false (Bool) if failed
+    */
+    
+    String retrievedString = fb.getString("Example/myString");
+    Serial.print("Retrieved String: ");
+    Serial.println(retrievedString);
+    
+    int retrievedInt = fb.getInt("Example/myInt");
+    Serial.print("Retrieved Int: ");
+    Serial.println(retrievedInt);
+    
+    float retrievedFloat = fb.getFloat("Example/myFloat");
+    Serial.print("Retrieved Float: ");
+    Serial.println(retrievedFloat);
+    
+    bool retrievedBool = fb.getBool("Example/myBool");
+    Serial.print("Retrieved Bool: ");
+    Serial.println(retrievedBool);
+
+    Serial.println();
+
+    /* ===== REMOVING DATA FROM FIREBASE ===== */
+    
+    Serial.println("Removing data from Firebase...");
+    
+    /*
+      Remove Data from Firebase
+      
+      Parameters:
+        - path: The path in Firebase from which the data will be removed
+
+      Returns:
+        - HTTP response code as an integer (200 = success)
+    */
+    
+    responseCode = fb.remove("Example");
+    Serial.print("Remove Example - Response Code: ");
+    Serial.println(responseCode);
+    
+    responseCode = fb.remove("Push");
+    Serial.print("Remove Push - Response Code: ");
+    Serial.println(responseCode);
+
+    Serial.println();
+    Serial.println("Example completed!");
 }
 
 void loop() {
-  // Nothing
+    // Nothing to do here
 }

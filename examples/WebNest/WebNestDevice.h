@@ -1,12 +1,3 @@
-/*
-  ---------------------------------
-      INFO: ArduinoJson Library   
-  ---------------------------------
-
-  Download ArduinoJson library from the Library Manager:
-  https://www.arduino.cc/reference/en/libraries/arduinojson/
-*/
-
 #ifndef WEBNEST_DEVICE_H
 #define WEBNEST_DEVICE_H
 
