@@ -110,7 +110,7 @@ void setup() {
     if (responseCode != 200) {
         Serial.print("Warning: Could not connect to Firebase. Response code: ");
         Serial.println(responseCode);
-        Serial.println("Make sure to add devices using the Webnest web interface.");
+        Serial.println("Make sure your Firebase Realtime Database is in Test Mode.");
     } else {
         Serial.println("Firebase connection successful!");
     }

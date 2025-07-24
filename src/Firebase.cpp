@@ -343,9 +343,8 @@ int Firebase::getBool(String path, bool& result) {
  * @return HTTP status code (200 = success)
  */
 int Firebase::getJson(String path, String& result) {
-    int statusCode = this->get(path, result);
-    // Note: The get() method already handles quote removal, so no additional processing needed
-    return statusCode;
+    // getJson is an alias for getString - they work identically
+    return this->getString(path, result);
 }
 
 /**
