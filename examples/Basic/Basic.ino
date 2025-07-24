@@ -146,25 +146,39 @@ void setup() {
       
       Parameters:
         - path: The path in Firebase from which the data will be retrieved
+        - result: Reference variable to store the retrieved value
 
       Returns:
-        - The value retrieved from Firebase
-        - Returns "NULL" (String), 0 (Int/Float), or false (Bool) if failed
+        - HTTP status code as an integer (200 = success)
+        - The retrieved value is stored in the result parameter
+        - If failed, result contains default values: "" (String), 0 (Int/Float), false (Bool)
     */
     
-    String retrievedString = fb.getString("Example/myString");
+    String retrievedString;
+    responseCode = fb.getString("Example/myString", retrievedString);
+    Serial.print("Get String - Response Code: ");
+    Serial.println(responseCode);
     Serial.print("Retrieved String: ");
     Serial.println(retrievedString);
     
-    int retrievedInt = fb.getInt("Example/myInt");
+    int retrievedInt;
+    responseCode = fb.getInt("Example/myInt", retrievedInt);
+    Serial.print("Get Int - Response Code: ");
+    Serial.println(responseCode);
     Serial.print("Retrieved Int: ");
     Serial.println(retrievedInt);
     
-    float retrievedFloat = fb.getFloat("Example/myFloat");
+    float retrievedFloat;
+    responseCode = fb.getFloat("Example/myFloat", retrievedFloat);
+    Serial.print("Get Float - Response Code: ");
+    Serial.println(responseCode);
     Serial.print("Retrieved Float: ");
     Serial.println(retrievedFloat);
     
-    bool retrievedBool = fb.getBool("Example/myBool");
+    bool retrievedBool;
+    responseCode = fb.getBool("Example/myBool", retrievedBool);
+    Serial.print("Get Bool - Response Code: ");
+    Serial.println(responseCode);
     Serial.print("Retrieved Bool: ");
     Serial.println(retrievedBool);
 

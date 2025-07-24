@@ -44,12 +44,12 @@ class Firebase {
         int pushBool(String path, bool data);
         int pushJson(String path, String data);
 
-        // Get methods - retrieve data from a specific path
-        String getString(String path);
-        int getInt(String path);
-        float getFloat(String path);
-        bool getBool(String path);
-        String getJson(String path);
+        // Get methods - retrieve data from a specific path (returns status code)
+        int getString(String path, String& result);
+        int getInt(String path, int& result);
+        int getFloat(String path, float& result);
+        int getBool(String path, bool& result);
+        int getJson(String path, String& result);
 
         // Remove method - delete data from a specific path
         int remove(String path);
@@ -62,7 +62,7 @@ class Firebase {
         void connect_to_host();
         int set(String path, String msg);
         int push(String path, String msg);
-        String get(String path);
+        int get(String path, String& result);
 
         // Platform-specific HTTPS client
         #if defined(ARDUINO_UNOWIFIR4)

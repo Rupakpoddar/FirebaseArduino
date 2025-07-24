@@ -104,10 +104,12 @@ void setup() {
 
     /* Test Firebase connection */
     Serial.println("Testing Firebase connection...");
-    String testData = fb.getString("webnest");
+    String testData;
+    int responseCode = fb.getString("webnest", testData);
     
-    if (testData == "NULL") {
-        Serial.println("Warning: Could not connect to Firebase or no devices found.");
+    if (responseCode != 200) {
+        Serial.print("Warning: Could not connect to Firebase. Response code: ");
+        Serial.println(responseCode);
         Serial.println("Make sure to add devices using the Webnest web interface.");
     } else {
         Serial.println("Firebase connection successful!");
@@ -121,11 +123,13 @@ void setup() {
 
 void loop() {
     /* ----- Poll Firebase for device updates ----- */
-    String deviceData = fb.getJson("webnest");
+    String deviceData;
+    int responseCode = fb.getJson("webnest", deviceData);
     
     // Check if data retrieval was successful
-    if (deviceData == "NULL") {
-        Serial.println("Failed to retrieve device data from Firebase");
+    if (responseCode != 200) {
+        Serial.print("Failed to retrieve device data from Firebase. Response code: ");
+        Serial.println(responseCode);
         delay(5000); // Wait 5 seconds before retrying
         return;
     }

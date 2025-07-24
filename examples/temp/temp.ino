@@ -122,11 +122,17 @@ void setup() {
     Serial.println("Retrieving JSON from Firebase...");
 
     // Retrieve the serialized JSON data from Firebase
-    String input = fb.getJson("Example");
+    String input;
+    responseCode = fb.getJson("Example", input);
+    Serial.print("Get JSON - Response Code: ");
+    Serial.println(responseCode);
 
-    // Check if the retrieved data is "NULL", indicating a retrieval error
-    if (input == "NULL") {
+    // Check if the retrieval was successful
+    if (responseCode != 200) {
         Serial.println("Could not retrieve data from Firebase");
+        Serial.print("Response code ");
+        Serial.print(responseCode);
+        Serial.println(" indicates an error occurred.");
         Serial.println("This might be due to:");
         Serial.println("- Network connectivity issues");
         Serial.println("- Incorrect Firebase URL or path");

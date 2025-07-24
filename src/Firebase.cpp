@@ -272,59 +272,89 @@ int Firebase::push(String path, String msg) {
 /**
  * Get a string value from the specified path
  * @param path Firebase path to retrieve data from
- * @return String value or "NULL" if failed
+ * @param result Reference to store the retrieved string value
+ * @return HTTP status code (200 = success)
  */
-String Firebase::getString(String path) {
-    return this->get(path);
+int Firebase::getString(String path, String& result) {
+    return this->get(path, result);
 }
 
 /**
  * Get an integer value from the specified path
  * @param path Firebase path to retrieve data from
- * @return Integer value or 0 if failed
+ * @param result Reference to store the retrieved integer value
+ * @return HTTP status code (200 = success)
  */
-int Firebase::getInt(String path) {
-    return this->get(path).toInt();
+int Firebase::getInt(String path, int& result) {
+    String data;
+    int statusCode = this->get(path, data);
+    
+    if (statusCode == 200) {
+        result = data.toInt();
+    } else {
+        result = 0;
+    }
+    
+    return statusCode;
 }
 
 /**
  * Get a float value from the specified path
  * @param path Firebase path to retrieve data from
- * @return Float value or 0.0 if failed
+ * @param result Reference to store the retrieved float value
+ * @return HTTP status code (200 = success)
  */
-float Firebase::getFloat(String path) {
-    return this->get(path).toFloat();
+int Firebase::getFloat(String path, float& result) {
+    String data;
+    int statusCode = this->get(path, data);
+    
+    if (statusCode == 200) {
+        result = data.toFloat();
+    } else {
+        result = 0.0;
+    }
+    
+    return statusCode;
 }
 
 /**
  * Get a boolean value from the specified path
  * @param path Firebase path to retrieve data from
- * @return Boolean value or false if failed
+ * @param result Reference to store the retrieved boolean value
+ * @return HTTP status code (200 = success)
  */
-bool Firebase::getBool(String path) {
-    return this->get(path) == "true";
+int Firebase::getBool(String path, bool& result) {
+    String data;
+    int statusCode = this->get(path, data);
+    
+    if (statusCode == 200) {
+        result = (data == "true");
+    } else {
+        result = false;
+    }
+    
+    return statusCode;
 }
 
 /**
  * Get a JSON object from the specified path
  * @param path Firebase path to retrieve data from
- * @return JSON string or "NULL" if failed
+ * @param result Reference to store the retrieved JSON string
+ * @return HTTP status code (200 = success)
  */
-String Firebase::getJson(String path) {
-    String response = this->get(path);
-    // Remove quotes if present (JSON objects come quoted from Firebase)
-    if (response.startsWith("\"") && response.endsWith("\"")) {
-        response = response.substring(1, response.length() - 1);
-    }
-    return response;
+int Firebase::getJson(String path, String& result) {
+    int statusCode = this->get(path, result);
+    // Note: The get() method already handles quote removal, so no additional processing needed
+    return statusCode;
 }
 
 /**
  * Internal method to get data using HTTP GET request
  * @param path Firebase path
- * @return Retrieved data or "NULL" if failed
+ * @param result Reference to store the retrieved data
+ * @return HTTP status code
  */
-String Firebase::get(String path) {
+int Firebase::get(String path, String& result) {
     connect_to_host();
 
     // Build the JSON endpoint URL
@@ -370,17 +400,19 @@ String Firebase::get(String path) {
         }
     }
 
-    // Return "NULL" if request failed
-    if (statusCode != 200) {
-        return "NULL";
+    // Set result based on status code
+    if (statusCode == 200) {
+        // Remove quotes from simple values
+        if (body.startsWith("\"") && body.endsWith("\"")) {
+            result = body.substring(1, body.length() - 1);
+        } else {
+            result = body;
+        }
+    } else {
+        result = "NULL";
     }
 
-    // Remove quotes from simple values
-    if (body.startsWith("\"") && body.endsWith("\"")) {
-        body = body.substring(1, body.length() - 1);
-    }
-
-    return body;
+    return statusCode;
 }
 
 /**
