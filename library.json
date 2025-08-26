@@ -1,0 +1,49 @@
+{
+  "name": "Firebase",
+  "version": "1.0.4",
+  "description": "Enables Firebase Realtime Database connectivity on the ESP8266, ESP32, Arduino UNO R4 WiFi. A reliable low latency library to read, write, update and remove data from Firebase Realtime Database.",
+  "keywords": [
+    "firebase",
+    "realtime-database",
+    "esp8266",
+    "esp32",
+    "arduino",
+    "json",
+    "communication",
+    "iot"
+  ],
+  "authors": [
+    {
+      "name": "Rupak Poddar",
+      "email": "rupakpoddarofficial@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rupakpoddar/FirebaseArduino.git"
+  },
+  "homepage": "https://github.com/Rupakpoddar/FirebaseArduino",
+  "documentation": "https://www.arduino.cc/reference/en/libraries/firebase/",
+  "license": "MIT",
+  "frameworks": ["arduino"],
+  "platforms": [
+    "espressif8266",
+    "espressif32",
+    "renesas-ra"
+  ],
+  "dependencies": [
+    {
+      "name": "ArduinoJson",
+      "version": "*"
+    }
+  ],
+  "export": {
+    "include": [
+      "src/*",
+      "examples/*",
+      "keywords.txt",
+      "library.properties"
+    ]
+  }
+}
