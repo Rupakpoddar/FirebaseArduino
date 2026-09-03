@@ -1,6 +1,6 @@
 {
   "name": "Firebase",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Enables Firebase Realtime Database connectivity on the ESP8266, ESP32, Arduino UNO R4 WiFi. A reliable low latency library to read, write, update and remove data from Firebase Realtime Database.",
   "keywords": [
     "firebase",
@@ -15,7 +15,7 @@
   "authors": [
     {
       "name": "Rupak Poddar",
-      "email": "rupakpoddarofficial@gmail.com",
+      "email": "rupak@poddar.io",
       "maintainer": true
     }
   ],
